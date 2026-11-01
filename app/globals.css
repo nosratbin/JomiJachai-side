@@ -293,6 +293,7 @@
   --map-safe: #22c55e;
   --map-careful: #f5b014;
   --map-risky: #ef4444;
+  --map-river: #38bdf8;
 }
 .lm {
   font-family: var(--font-sans);
@@ -318,6 +319,13 @@
 .lm .lm-dag.risky {
   fill: var(--map-risky);
   stroke: var(--map-risky);
+}
+/* lost to the river: water blue, dashed, whatever its status level */
+.lm .lm-dag.lost {
+  fill: var(--map-river);
+  stroke: var(--map-river);
+  stroke-dasharray: 6 5;
+  fill-opacity: 0.22;
 }
 .lm .lm-dag:hover {
   fill-opacity: 0.5;

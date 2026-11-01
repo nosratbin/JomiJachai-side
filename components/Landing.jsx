@@ -16,6 +16,12 @@ import {
   SmartphoneIcon,
   CircleCheckIcon,
   OctagonXIcon,
+  IdCardIcon,
+  MegaphoneIcon,
+  ReceiptTextIcon,
+  WavesIcon,
+  SproutIcon,
+  GlobeIcon,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useRegister } from "@/lib/api";
@@ -55,6 +61,7 @@ function SiteHeader() {
   const links = [
     ["map", tr("জমির ম্যাপ", "Land map")],
     ["services", tr("সেবাসমূহ", "Services")],
+    ["sdg", tr("টেকসই উন্নয়ন", "SDGs")],
     ["verify", tr("দলিল যাচাই", "Verify a deed")],
     ["faq", tr("জিজ্ঞাসা", "Questions")],
   ];
@@ -310,8 +317,13 @@ function Services({ state }) {
     ["officer-plots", MapIcon, "--tile-7", tr("দাগ ও অংশ", "Plots & shares"), tr("প্রত্যেক মালিকের অবশিষ্ট অংশ", "Each owner's remaining share"), tr("অফিসার", "Officer")],
     ["officer-deeds", FileTextIcon, "--tile-4", tr("নিবন্ধিত দলিল", "Registered deeds"), tr(`${tr.num(state.deeds.length)}টি দলিল, ডিজিটাল ছাপসহ`, `${state.deeds.length} deeds with fingerprints`), tr("অফিসার", "Officer")],
     ["officer-log", ScrollTextIcon, "--tile-8", tr("কার্যক্রমের ইতিহাস", "Activity log"), tr("শুধু যোগ হয়, বদলানো যায় না", "Added to, never edited"), tr("অফিসার", "Officer")],
-    ["officer-sync", RefreshCwIcon, "--tile-6", tr("ফোনেও দেখুন", "Sync to phone"), tr("ল্যাপটপের দলিল ফোনে নিন", "Bring new deeds to a phone"), tr("অফিসার", "Officer")],
-    ["officer-next", SparklesIcon, "--tile-5", tr("পরের ধাপ", "Next phase"), tr("উত্তরাধিকার, নামজারি, ভূমি কর", "Inheritance, namjari, land tax"), tr("পরিকল্পিত", "Planned")],
+    ["citizen-card", IdCardIcon, "--tile-6", tr("কৃষক কার্ড", "Krishak Card"), tr("জমি, বর্গা, খাস আর সরকারি বার্তা এক কার্ডে", "Land, borga, khas and messages on one card"), tr("নাগরিক", "Citizen")],
+    ["officer-notices", MegaphoneIcon, "--tile-5", tr("অধিগ্রহণের আগাম নোটিশ", "Acquisition notice"), tr("মালিককে সরাসরি খবর, বিক্রি বন্ধ", "Owners told directly, sales frozen"), tr("অফিসার", "Officer")],
+    ["officer-tax", ReceiptTextIcon, "--tile-4", tr("ভূমি উন্নয়ন কর", "Land tax"), tr("৩ বছর বকেয়া হলে সতর্কবার্তা", "An alert after 3 years overdue"), tr("অফিসার", "Officer")],
+    ["officer-erosion", WavesIcon, "--tile-3", tr("নদীভাঙন", "River erosion"), tr("শনাক্ত, যাচাই ও পুনর্বাসন", "Find, verify, rehabilitate"), tr("অফিসার", "Officer")],
+    ["officer-khas", SproutIcon, "--tile-1", tr("খাস জমি ও বর্গা", "Khas land & borga"), tr("ভূমিহীনকে খাস জমি, বর্গাদারের সুরক্ষা", "Khas land to the landless, borga protected"), tr("অফিসার", "Officer")],
+    ["officer-sync", RefreshCwIcon, "--tile-7", tr("ফোনেও দেখুন", "Sync to phone"), tr("ল্যাপটপের দলিল ফোনে নিন", "Bring new deeds to a phone"), tr("অফিসার", "Officer")],
+    ["officer-next", SparklesIcon, "--tile-2", tr("পরের ধাপ", "Next phase"), tr("উত্তরাধিকার বণ্টন, নামজারি, এসএমএস", "Inheritance division, namjari, SMS"), tr("পরিকল্পিত", "Planned")],
   ];
   return (
     <section id="services" className="scroll-mt-24 bg-mint pt-16 pb-20 md:pt-20 md:pb-28">
@@ -335,6 +347,99 @@ function Services({ state }) {
                 <span className="px-3 text-sm text-muted-foreground">{desc}</span>
                 <span className="mt-auto rounded-full bg-muted px-2.5 py-0.5 text-sm font-semibold text-muted-foreground">{who}</span>
               </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------- SDGs
+// Each goal names the UN target it serves and the features that already work for it,
+// with live counts from the register. Plain text and our own colours: no UN logos.
+function Sdgs({ state }) {
+  const tr = useT();
+  const n = (x) => tr.num(x);
+  const count = (o) => Object.keys(o || {}).length;
+  const khasFamilies = new Set(Object.values(state.khas || {}).map((k) => k.family)).size;
+  const riverFamilies = new Set(Object.keys(state.erosion || {}).flatMap((p) => Object.keys(state.shares[p] || {}))).size;
+  const coOwned = Object.values(state.shares).filter((s) => Object.keys(s).length > 1).length;
+  const goals = [
+    {
+      goal: 1,
+      color: "--tile-5",
+      title: tr("দারিদ্র্য বিলোপ", "No poverty"),
+      target: tr("লক্ষ্য ১.৪: জমির মালিকানা ও নিয়ন্ত্রণে সবার সমান অধিকার", "Target 1.4: equal rights to ownership and control over land"),
+      how: tr("প্রতিটি মালিকের অবশিষ্ট অংশ রেকর্ডে থাকে, তাই কেউ গরিব শরিকের অংশ বিক্রি করে দিতে পারে না। খাস কৃষিজমি যায় ভূমিহীন পরিবারের কাছে।", "Every owner's remaining share is on record, so no one can sell a poorer co-owner's share. Khas farmland goes to landless families."),
+      stat: tr(`${n(khasFamilies)}টি ভূমিহীন পরিবার খাস জমি পেয়েছে`, `${khasFamilies} landless families settled on khas land`),
+    },
+    {
+      goal: 2,
+      color: "--tile-4",
+      title: tr("ক্ষুধামুক্তি", "Zero hunger"),
+      target: tr("লক্ষ্য ২.৩: ক্ষুদ্র কৃষকের জমিতে নিরাপদ ও সমান প্রবেশাধিকার", "Target 2.3: secure and equal access to land for small farmers"),
+      how: tr("কৃষক কার্ড রেজিস্টার থেকেই হিসাব করে কে প্রান্তিক বা ক্ষুদ্র কৃষক। বর্গা চুক্তি নথিভুক্ত থাকলে জমি বিক্রি হলেও বর্গাদার উচ্ছেদ হন না।", "The Krishak Card works out from the register who is a marginal or small farmer. A recorded borga agreement stays with the land, so a sale does not evict the bargadar."),
+      stat: tr(`${n(count(state.cards))}টি কৃষক কার্ড · ${n(count(state.borga))}টি বর্গা চুক্তি`, `${count(state.cards)} Krishak Cards · ${count(state.borga)} borga agreements`),
+    },
+    {
+      goal: 5,
+      color: "--tile-6",
+      title: tr("জেন্ডার সমতা", "Gender equality"),
+      target: tr("লক্ষ্য ৫.ক: জমির মালিকানায় নারীর সমান অধিকার", "Target 5.a: women's equal rights to own and control land"),
+      how: tr("উত্তরাধিকারসূত্রে পাওয়া বোন বা মায়ের অংশও রেজিস্টারে আলাদা থাকে। কোনো শরিক বিক্রি করলে তাঁরা সরাসরি খবর পান, আর অগ্রক্রয়ের অধিকারের কথা জানানো হয়।", "Shares that sisters and mothers inherit sit on the register in their own names. When a co-sharer sells, they are told directly, including their right of pre-emption."),
+      stat: tr(`${n(coOwned)}টি দাগে একাধিক শরিক`, `${coOwned} dags with several co-owners`),
+    },
+    {
+      goal: 13,
+      color: "--tile-3",
+      title: tr("জলবায়ু কার্যক্রম", "Climate action"),
+      target: tr("লক্ষ্য ১৩.১: জলবায়ুজনিত দুর্যোগে সহনশীলতা", "Target 13.1: resilience to climate-related disasters"),
+      how: tr("নদীভাঙনে জমি হারানো পরিবার ছয় ধাপে শনাক্ত ও যাচাই হয়। বিলীন জমির বিক্রি বন্ধ, কর মওকুফ, আর খাস বন্দোবস্তে তাঁরা অগ্রাধিকার পান।", "Families who lose land to river erosion are identified and verified in six steps. Sales of the lost land stop, its tax is waived, and they get priority for khas land."),
+      stat: tr(`${n(riverFamilies)}টি পরিবারের নদীভাঙন কেস`, `River-erosion cases for ${riverFamilies} families`),
+    },
+    {
+      goal: 16,
+      color: "--tile-1",
+      title: tr("শান্তি, ন্যায়বিচার ও শক্তিশালী প্রতিষ্ঠান", "Peace, justice and strong institutions"),
+      target: tr("লক্ষ্য ১৬.৫ ও ১৬.৬: দুর্নীতি কমানো, জবাবদিহিমূলক ও স্বচ্ছ প্রতিষ্ঠান", "Targets 16.5 and 16.6: less corruption, accountable and transparent institutions"),
+      how: tr("নিবন্ধনের আগেই আটটি যাচাই অতিরিক্ত ও দ্বিতীয়বার বিক্রি আটকায়। দলিলে SHA-256 কিউআর, আর কার্যলিপি শুধু যোগ হয়, বদলানো যায় না। আগাম নোটিশ দালালের কম দামে কেনা ঠেকায়।", "Eight checks before registration block over-selling and double-selling. Deeds carry a SHA-256 QR, and the activity log can only be added to. Advance notices stop middlemen buying cheap before acquisition."),
+      stat: tr(`${n(state.deeds.length)}টি দলিল · ${n(state.log.length)}টি কার্যলিপি লাইন`, `${state.deeds.length} deeds · ${state.log.length} log lines`),
+    },
+  ];
+  return (
+    <section id="sdg" className="scroll-mt-24 py-20 md:py-28">
+      <div className="container-site flex flex-col gap-10">
+        <div className="flex max-w-[60ch] flex-col gap-3">
+          <p data-reveal className="flex items-center gap-2 font-semibold text-primary">
+            <GlobeIcon className="size-5" aria-hidden="true" />
+            {tr("জাতিসংঘের টেকসই উন্নয়ন লক্ষ্য (SDG)", "UN Sustainable Development Goals (SDGs)")}
+          </p>
+          <h2 data-reveal style={{ "--i": 1 }} className="text-3xl font-bold text-primary md:text-4xl">
+            {tr("নিরাপদ জমি, টেকসই গ্রাম", "Secure land, lasting villages")}
+          </h2>
+          <p data-reveal style={{ "--i": 2 }} className="text-lg text-muted-foreground">
+            {tr("জমির নিরাপদ মালিকানা দারিদ্র্য, খাদ্য, নারীর অধিকার, জলবায়ু আর সুশাসন, এই পাঁচ লক্ষ্যের সঙ্গে যুক্ত। নিচের সংখ্যাগুলো রেজিস্টার থেকে এই মুহূর্তে হিসাব করা।", "Secure land rights connect to five goals: poverty, food, women's rights, climate and good governance. The numbers below are counted from the register right now.")}
+          </p>
+        </div>
+        <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+          {goals.map((g, i) => (
+            <li key={g.goal} data-reveal style={{ "--i": i % 3, "--c": `var(${g.color})` }} className={cn("flex flex-col overflow-hidden rounded-lg bg-card ring-1 ring-border", i < 3 ? "xl:col-span-2" : "xl:col-span-3", i === goals.length - 1 && "md:col-span-2")}>
+              <div className="flex items-center gap-4 px-5 py-4" style={{ background: "color-mix(in oklch, var(--c) 12%, transparent)" }}>
+                <span className="num inline-flex size-14 shrink-0 items-center justify-center rounded-xl bg-(--c) text-2xl font-extrabold text-background">{n(g.goal)}</span>
+                <div className="flex min-w-0 flex-col">
+                  <span className="text-sm font-semibold text-muted-foreground">SDG {n(g.goal)}</span>
+                  <h3 className="text-lg leading-snug font-bold">{g.title}</h3>
+                </div>
+              </div>
+              <div className="flex flex-1 flex-col gap-3 px-5 py-5">
+                <p className="text-sm font-semibold">{g.target}</p>
+                <p className="text-muted-foreground">{g.how}</p>
+                <p className="mt-auto flex items-center gap-2 border-t pt-3 font-semibold text-primary">
+                  <CircleCheckIcon className="size-4 shrink-0" aria-hidden="true" />
+                  {g.stat}
+                </p>
+              </div>
             </li>
           ))}
         </ul>
@@ -599,8 +704,13 @@ function SiteFooter() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-3 text-lg font-bold text-primary">{tr("পরিকল্পনা ও বাস্তবায়নে", "Planned and built by")}</h2>
-          <p className="text-lg font-semibold">{tr("টিম “Falcon”", "Team “Falcon”")}</p>
+          <h2 className="mb-3 text-lg font-bold text-primary">{tr("প্রকল্প প্রদর্শনী", "Project showcase")}</h2>
+          <p className="font-semibold">BCS ICT Fest 2026 · Project Showcasing</p>
+          <p>{tr("টিম “ইচ্ছে ঘুড়ি”", "Team “ICCHE GHURI”")}</p>
+          <button onClick={() => scrollToId("sdg")} className="mt-1 inline-flex min-h-8 cursor-pointer items-center gap-1 text-primary hover:underline">
+            <ChevronRightIcon className="size-4" aria-hidden="true" />
+            {tr("টেকসই উন্নয়ন লক্ষ্যে অবদান", "How it serves the SDGs")}
+          </button>
           <h2 className="mt-6 mb-2 font-bold text-primary">{tr("ফোনে অ্যাপ হিসেবে রাখুন", "Keep it on your phone")}</h2>
           <p className="text-sm">{tr("ক্রোমের মেনু (⋮) থেকে \"হোম স্ক্রিনে যোগ করুন\"। প্লে স্টোর লাগবে না।", "In Chrome, open the menu (⋮) and tap \"Add to Home screen\". No Play Store needed.")}</p>
         </div>
@@ -645,6 +755,7 @@ export default function Landing() {
         <Hero state={state} onSearch={onSearch} />
         <MapSection state={state} result={result} onSelect={(id) => onSearch(state.plots[id].mouza.en, state.plots[id].dag)} />
         <Services state={state} />
+        <Sdgs state={state} />
         <Fields />
         <Verify state={state} />
         <Faq />

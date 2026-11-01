@@ -56,6 +56,17 @@ create table if not exists settings (
   value jsonb not null
 );
 
+-- Land services records. kind is one of:
+--   tax (land tax paid up to), notice (advance acquisition notice), erosion (river erosion case),
+--   khas (khas land settlement), borga (sharecropping agreement), card (Krishak Card).
+-- Records can change (e.g. a tax payment or the next erosion step); every change is also a line in activity_log.
+create table if not exists records (
+  kind text not null check (kind in ('tax', 'notice', 'erosion', 'khas', 'borga', 'card')),
+  id   text not null,
+  data jsonb not null,
+  primary key (kind, id)
+);
+
 -- ---------- Integrity enforced by the database ----------
 -- Deeds and log lines can be added, never edited or deleted.
 create or replace function forbid_change() returns trigger
@@ -97,18 +108,19 @@ create trigger activity_log_chain before insert on activity_log
 create or replace function reset_demo() returns void
 language plpgsql security definer set search_path = public as $$
 begin
-  truncate activity_log, deeds, shares, people, plots, settings;
+  truncate activity_log, deeds, shares, records, people, plots, settings;
 end $$;
 
--- ---------- Access (Round 1 demo level) ----------
+-- ---------- Access (sample-data level: anyone with the public key) ----------
 -- Anyone with the app can read the register and add to it. Nobody can edit or delete deeds or log lines.
--- For real use: officer accounts (Supabase Auth) and the six checks moved into a database function.
+-- For real use: officer accounts (Supabase Auth) and the eight checks moved into a database function.
 alter table people       enable row level security;
 alter table plots        enable row level security;
 alter table shares       enable row level security;
 alter table deeds        enable row level security;
 alter table activity_log enable row level security;
 alter table settings     enable row level security;
+alter table records      enable row level security;
 
 drop policy if exists "read register" on people;       create policy "read register" on people       for select using (true);
 drop policy if exists "read register" on plots;        create policy "read register" on plots        for select using (true);
@@ -126,6 +138,9 @@ drop policy if exists "change shares" on shares;       create policy "change sha
 drop policy if exists "remove shares" on shares;       create policy "remove shares" on shares       for delete using (true);
 drop policy if exists "add settings" on settings;      create policy "add settings" on settings      for insert with check (true);
 drop policy if exists "change settings" on settings;   create policy "change settings" on settings   for update using (true) with check (true);
+drop policy if exists "read register" on records;      create policy "read register" on records      for select using (true);
+drop policy if exists "add records" on records;        create policy "add records" on records        for insert with check (true);
+drop policy if exists "change records" on records;     create policy "change records" on records     for update using (true) with check (true);
 
 -- ---------- Live updates (phone sees new deeds without a refresh) ----------
 do $$
@@ -133,6 +148,10 @@ begin
   if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
     begin
       alter publication supabase_realtime add table people, plots, shares, deeds, activity_log, settings;
+    exception when duplicate_object then null;
+    end;
+    begin
+      alter publication supabase_realtime add table records;
     exception when duplicate_object then null;
     end;
   end if;

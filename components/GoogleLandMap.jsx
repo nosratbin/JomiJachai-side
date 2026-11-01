@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { plotStatus } from "@/lib/register";
+import { isLost } from "@/lib/land-services";
 import { MAP_COLOR, outline, centre, allOutlines, closeZoom } from "@/lib/map";
 import { LEVEL } from "./PlotSlip";
 
@@ -91,12 +92,13 @@ export default function GoogleLandMap({ state, selected, onSelect, recenter }) {
       if (!pts) continue;
       const level = plotStatus(state, id).level;
       const on = selected === id;
+      const colour = isLost(state, id) ? MAP_COLOR.river : MAP_COLOR[level];
       const poly = new maps.Polygon({
         map,
         paths: pts.map(([lat, lng]) => ({ lat, lng })),
-        strokeColor: on ? "#ffffff" : MAP_COLOR[level],
+        strokeColor: on ? "#ffffff" : colour,
         strokeWeight: on ? 4 : 2,
-        fillColor: MAP_COLOR[level],
+        fillColor: colour,
         fillOpacity: on ? 0.45 : 0.32,
         zIndex: on ? 2 : 1,
       });

@@ -24,12 +24,21 @@ const RESULT = {
   genuine: ["success", "আসল", "Genuine"],
   altered: ["destructive", "বদলানো", "Altered"],
   mismatch: ["destructive", "মেলেনি", "No match"],
+  notice: ["warning", "নোটিশ", "Notice"],
+  recorded: ["info", "নথিভুক্ত", "Recorded"],
+  paid: ["success", "পরিশোধিত", "Paid"],
 };
 
 const KINDS = [
   ["check", "বিক্রির আবেদন", "Sale applications"],
   ["register", "দলিল নিবন্ধন", "Deed registrations"],
   ["verify", "দলিল যাচাই", "Deed checks"],
+  ["notice", "অধিগ্রহণের নোটিশ", "Acquisition notices"],
+  ["tax", "ভূমি উন্নয়ন কর", "Land tax"],
+  ["erosion", "নদীভাঙন", "River erosion"],
+  ["khas", "খাস বন্দোবস্ত", "Khas settlements"],
+  ["borga", "বর্গা চুক্তি", "Borga agreements"],
+  ["card", "কৃষক কার্ড", "Krishak Cards"],
 ];
 
 const PERIODS = [

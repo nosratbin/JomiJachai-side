@@ -1,11 +1,12 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
-import { SendIcon, CheckIcon, PrinterIcon, PlusIcon, OctagonXIcon, TriangleAlertIcon, CircleCheckIcon, PencilIcon, LockIcon } from "lucide-react";
+import { SendIcon, CheckIcon, PrinterIcon, PlusIcon, OctagonXIcon, TriangleAlertIcon, CircleCheckIcon, PencilIcon, LockIcon, UsersIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { usePrefs } from "@/lib/store";
 import { api, useRegister } from "@/lib/api";
 import { ownersOf, findPerson, officerName } from "@/lib/register";
+import { saleNotes } from "@/lib/land-services";
 import * as F from "@/lib/fraction";
 import { go } from "@/lib/nav";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,46 @@ import { Spinner } from "@/components/ui/spinner";
 import { PageHeader } from "../brand";
 import PlotRecord from "./PlotRecord";
 import { DeedPaper } from "./Deeds";
+
+// Not rules: who must be told about this sale, and agreements that go with the land.
+function SaleNotes({ state, notes, after = false, className }) {
+  const tr = useT();
+  const name = (id) => tr.pick(state.people[id]);
+  if (!notes.coSharers.length && !notes.borga.length) return null;
+  const pre = notes.coSharers.filter((c) => c.preempt);
+  return (
+    <Alert variant="info" className={className}>
+      <UsersIcon />
+      <AlertTitle>{after ? tr("এই বিক্রির নোটিশ পাঠানো হবে", "Notices for this sale") : tr("নিবন্ধনের পর নোটিশ যাবে", "Notices after registration")}</AlertTitle>
+      <AlertDescription>
+        <ul className="flex flex-col gap-1.5">
+          {notes.coSharers.length > 0 && (
+            <li>
+              {tr("শরিকদের জানানো হবে: ", "Co-sharers to be told: ")}
+              <span className="font-semibold text-foreground">{notes.coSharers.map((c) => name(c.person)).join(", ")}</span>
+            </li>
+          )}
+          {pre.length > 0 && (
+            <li>
+              {tr(
+                `ক্রেতা শরিক নন, তাই উত্তরাধিকারসূত্রে শরিক ${pre.map((c) => name(c.person)).join(", ")} নোটিশ পাওয়ার ২ মাসের মধ্যে অগ্রক্রয়ের আবেদন করতে পারেন (দাম + ২৫% + বছরে ৮% জমা দিয়ে)।`,
+                `The buyer is not a co-sharer, so co-sharers by inheritance (${pre.map((c) => name(c.person)).join(", ")}) may apply for pre-emption within 2 months of the notice (by depositing the price + 25% + 8% a year).`
+              )}
+            </li>
+          )}
+          {notes.borga.map((b) => (
+            <li key={b.id}>
+              {tr(
+                `বর্গা চুক্তি ${b.id} (${F.display(F.parse(b.decimals))} শতাংশ, বর্গাদার ${state.people[b.bargadar].bn}) জমির সঙ্গে থাকবে; ক্রেতাকে জানানো হবে।`,
+                `Borga agreement ${b.id} (${F.display(F.parse(b.decimals))} decimals, bargadar ${state.people[b.bargadar].en}) stays with the land; the buyer is told.`
+              )}
+            </li>
+          ))}
+        </ul>
+      </AlertDescription>
+    </Alert>
+  );
+}
 
 export default function RegisterSale() {
   const tr = useT();
@@ -44,6 +85,7 @@ export default function RegisterSale() {
   const [ack, setAck] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);
+  const [notes, setNotes] = useState(null);
 
   const owners = ownersOf(state, plotId);
   const others = Object.keys(state.people).filter((p) => !owners.some((o) => o.person === p));
@@ -62,7 +104,9 @@ export default function RegisterSale() {
   const input = { plot: plotId, seller, decimals, buyerName };
 
   async function register() {
+    const n = saleNotes(state, input);
     setDone(await api.registerSale(input, officer));
+    setNotes(n);
     setOutcome(null);
   }
 
@@ -138,6 +182,7 @@ export default function RegisterSale() {
             {tr("সব মালিকের অংশ হালনাগাদ হয়েছে, দলিলের ডিজিটাল ছাপ তৈরি হয়েছে, আর কার্যলিপিতে লেখা হয়েছে।", "Every owner's share was updated, the deed's digital fingerprint was created, and the step was written to the activity log.")}
           </AlertDescription>
         </Alert>
+        {notes && <SaleNotes state={state} notes={notes} after />}
         <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
           <DeedPaper deed={done} state={state} />
           <PlotRecord state={state} plotId={done.plot} />
@@ -285,6 +330,7 @@ export default function RegisterSale() {
                   );
                 })}
               </ul>
+              {!blocked && <SaleNotes state={state} notes={saleNotes(state, input)} className="mx-5 mb-5" />}
               {error?.field === "form" && (
                 <Alert variant="destructive" className="mx-5 mb-5 w-auto">
                   <TriangleAlertIcon />

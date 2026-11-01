@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import { SearchIcon, ScanQrCodeIcon, CircleHelpIcon, HouseIcon } from "lucide-react";
+import { SearchIcon, ScanQrCodeIcon, CircleHelpIcon, HouseIcon, IdCardIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { go } from "@/lib/nav";
@@ -9,6 +9,7 @@ import { LangToggle, ThemeToggle } from "../brand";
 import CheckLand from "./CheckLand";
 import CheckDeed from "./CheckDeed";
 import Help from "./Help";
+import KrishakCard from "./KrishakCard";
 
 export default function Citizen({ route, flash, clearFlash }) {
   const tr = useT();
@@ -21,10 +22,11 @@ export default function Citizen({ route, flash, clearFlash }) {
     clearFlash();
   }, [flash]);
 
-  const tab = route.startsWith("v-") || route === "citizen-deed" ? "deed" : route === "citizen-help" ? "help" : "land";
+  const tab = route.startsWith("v-") || route === "citizen-deed" ? "deed" : route.startsWith("citizen-card") ? "card" : route === "citizen-help" ? "help" : "land";
   const TABS = [
     ["land", "citizen", SearchIcon, tr("জমি যাচাই", "Check land")],
     ["deed", "citizen-deed", ScanQrCodeIcon, tr("দলিল যাচাই", "Check a deed")],
+    ["card", "citizen-card", IdCardIcon, tr("কৃষক কার্ড", "Krishak Card")],
     ["help", "citizen-help", CircleHelpIcon, tr("সাহায্য", "Help")],
   ];
   const title = TABS.find(([k]) => k === tab)[3];
@@ -47,10 +49,11 @@ export default function Citizen({ route, flash, clearFlash }) {
         <main className="flex-1 px-4 pt-6 pb-32">
           {tab === "land" && <CheckLand route={route} />}
           {tab === "deed" && <CheckDeed route={route} />}
+          {tab === "card" && <KrishakCard route={route} />}
           {tab === "help" && <Help />}
         </main>
         <nav className="pb-safe fixed inset-x-0 bottom-0 z-30" aria-label={tr("অ্যাপ মেনু", "App menu")}>
-          <div className="mx-auto grid max-w-[30rem] grid-cols-3 bg-background ring-1 ring-border">
+          <div className="mx-auto grid max-w-[30rem] grid-cols-4 bg-background ring-1 ring-border">
             {TABS.map(([key, r, Icon, label]) => {
               const active = tab === key;
               return (

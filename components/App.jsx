@@ -11,8 +11,10 @@ import Officer from "./officer/Officer";
 import Citizen from "./citizen/Citizen";
 
 // Routes live in the URL hash so the app works as one static page on any host:
-//   #officer, #officer-plots, #officer-deeds, #officer-log, #officer-sync, #officer-next, #deed-2026-0147
-//   #citizen, #citizen-deed, #citizen-help, #v-2026-0147-<fingerprint> (from a deed's QR), #s-<data> (demo sync)
+//   #officer, #officer-plots, #officer-deeds, #officer-log, #officer-stats, #officer-sync, #officer-next, #deed-2026-0147
+//   #officer-notices, #officer-tax, #officer-erosion, #officer-khas, #officer-cards (land services)
+//   #citizen, #citizen-deed, #citizen-card, #citizen-card-<no>, #citizen-help,
+//   #v-2026-0147-<fingerprint> (from a deed's QR), #s-<data> (phone sync)
 //   #check-<mouza>-<dag> opens the Citizen App on that plot (from the website's search card)
 function readHash() {
   if (typeof window === "undefined") return "";

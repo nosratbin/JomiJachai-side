@@ -2,7 +2,7 @@
   "name": "jomijachai",
   "version": "0.1.0",
   "private": true,
-  "description": "JomiJachai (জমিযাচাই): check every land sale before registration and verify deeds by QR. LandTech Hackathon 2026, Round 1 prototype.",
+  "description": "JomiJachai (জমিযাচাই): check every land sale before registration and verify deeds by QR, plus land tax, acquisition notices, river-erosion rehabilitation, khas land, borga and the Krishak Card.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

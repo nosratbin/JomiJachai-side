@@ -3,6 +3,7 @@
 import { CircleCheckIcon, TriangleAlertIcon, OctagonXIcon } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { plotStatus } from "@/lib/register";
+import { taxStatus, taxYearLabel, coSharers, borgaOn, BASIS } from "@/lib/land-services";
 import * as F from "@/lib/fraction";
 import { cn } from "@/lib/utils";
 import { ReadAloudButton } from "./brand";
@@ -16,11 +17,19 @@ export const LEVEL = {
 function Row({ label, value, strong, className }) {
   return (
     <div className={cn("flex items-baseline gap-2", className)}>
-      <span className="shrink-0">{label}</span>
+      <span className="min-w-0">{label}</span>
       <span className="leader" aria-hidden="true" />
       <span className={cn("num shrink-0 text-right", strong && "font-bold")}>{value}</span>
     </div>
   );
+}
+
+export function taxText(tr, tax) {
+  if (tax.exempt === "khas") return tr("প্রযোজ্য নয়", "Not applicable");
+  if (tax.exempt === "river") return tr("মওকুফ (নদীতে বিলীন)", "Waived (lost to river)");
+  if (tax.paidUpTo == null) return tr("রেকর্ড নেই", "No record");
+  if (tax.overdue) return tr(`${tr.num(tax.overdue)} বছর বকেয়া`, `${tax.overdue} yr(s) overdue`);
+  return tr(`${tr.num(taxYearLabel(tax.paidUpTo))} পর্যন্ত পরিশোধিত`, `Paid to ${taxYearLabel(tax.paidUpTo)}`);
 }
 
 const spoken = (f) => {
@@ -43,6 +52,9 @@ export default function PlotSlip({ state, plotId, className, footer, brief = fal
   const plot = state.plots[plotId];
   const result = plotStatus(state, plotId);
   const level = LEVEL[result.level];
+  const tax = taxStatus(state, plotId);
+  const sharers = coSharers(state, plotId);
+  const borga = borgaOn(state, plotId);
   return (
     <article className={cn("slip relative w-full px-5 pt-5 text-base sm:px-7 sm:pt-7", className)} aria-live="polite" aria-label={tr("দাগের পর্চা", "Plot record slip")}>
       <header className="flex items-start justify-between gap-4">
@@ -62,14 +74,34 @@ export default function PlotSlip({ state, plotId, className, footer, brief = fal
         <Row label={tr("খতিয়ান", "Khatian")} value={tr.num(plot.khatian)} />
         <Row label={tr("জমির শ্রেণি", "Land class")} value={tr.pick(plot.landType)} />
         <Row label={tr("মোট জমি", "Total area")} value={`${tr.num(F.display(plot.total))} ${tr("শতাংশ", "decimals")}`} strong />
+        <Row label={tr("ভূমি উন্নয়ন কর", "Land tax")} value={taxText(tr, tax)} className={tax.alert ? "text-warning font-semibold" : undefined} />
       </div>
 
       <p className="mt-5 mb-1.5 font-bold">{tr("মালিক ও অবশিষ্ট অংশ", "Owners and remaining shares")}</p>
       <div className="flex flex-col gap-1.5">
-        {result.owners.map((o) => (
-          <Row key={o.person} label={tr.pick(state.people[o.person])} value={`${tr.num(F.display(o.share))} ${tr("শতাংশ", "dec.")}`} />
+        {sharers.map((o) => (
+          <Row
+            key={o.person}
+            label={
+              <>
+                {tr.pick(state.people[o.person])}
+                {sharers.length > 1 && <span className="ml-1.5 text-sm text-muted-foreground">({tr.pick(BASIS[o.basis])})</span>}
+              </>
+            }
+            value={`${tr.num(F.display(o.share))} ${tr("শতাংশ", "dec.")}`}
+          />
         ))}
       </div>
+      {borga.length > 0 && (
+        <>
+          <p className="mt-5 mb-1.5 font-bold">{tr("বর্গা চাষ", "Borga (sharecropping)")}</p>
+          <div className="flex flex-col gap-1.5">
+            {borga.map((b) => (
+              <Row key={b.id} label={tr(`বর্গাদার ${state.people[b.bargadar].bn}`, `Bargadar ${state.people[b.bargadar].en}`)} value={`${tr.num(F.display(F.parse(b.decimals)))} ${tr("শতাংশ", "dec.")}`} />
+            ))}
+          </div>
+        </>
+      )}
 
       {!brief && (
         <>

@@ -20,6 +20,9 @@ const RESULT = {
   genuine: ["success", "আসল", "Genuine"],
   altered: ["destructive", "বদলানো", "Altered"],
   mismatch: ["destructive", "মেলেনি", "No match"],
+  notice: ["warning", "নোটিশ", "Notice"],
+  recorded: ["info", "নথিভুক্ত", "Recorded"],
+  paid: ["success", "পরিশোধিত", "Paid"],
   info: ["secondary", "তথ্য", "Info"],
 };
 

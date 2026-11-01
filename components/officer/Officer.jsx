@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import { FilePlus2Icon, MapIcon, MapPinIcon, FileTextIcon, ScrollTextIcon, RefreshCwIcon, SparklesIcon, SmartphoneIcon, HouseIcon, ChartColumnIcon } from "lucide-react";
+import { FilePlus2Icon, MapIcon, MapPinIcon, FileTextIcon, ScrollTextIcon, RefreshCwIcon, SparklesIcon, SmartphoneIcon, HouseIcon, ChartColumnIcon, MegaphoneIcon, ReceiptTextIcon, WavesIcon, SproutIcon, IdCardIcon } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { usePrefs } from "@/lib/store";
 import { useRegister } from "@/lib/api";
@@ -35,6 +35,11 @@ import ActivityLog from "./ActivityLog";
 import SyncPhone from "./SyncPhone";
 import NextPhase from "./NextPhase";
 import Statistics from "./Statistics";
+import Notices from "./Notices";
+import LandTax from "./LandTax";
+import Erosion from "./Erosion";
+import KhasBorga from "./KhasBorga";
+import Cards from "./Cards";
 
 const ITEM = "h-11 text-[0.9375rem] text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold data-[active=true]:text-sidebar-accent-foreground data-[active=true]:hover:bg-sidebar-accent data-[active=true]:hover:text-sidebar-accent-foreground";
 
@@ -191,6 +196,16 @@ export default function Officer({ route }) {
       ],
     },
     {
+      label: tr("ভূমি সেবা", "Land services"),
+      items: [
+        { key: "officer-notices", icon: MegaphoneIcon, label: tr("অধিগ্রহণের নোটিশ", "Acquisition notices") },
+        { key: "officer-tax", icon: ReceiptTextIcon, label: tr("ভূমি উন্নয়ন কর", "Land tax") },
+        { key: "officer-erosion", icon: WavesIcon, label: tr("নদীভাঙন", "River erosion"), count: Object.values(state.erosion || {}).filter((e) => e.step < 5).length },
+        { key: "officer-khas", icon: SproutIcon, label: tr("খাস জমি ও বর্গা", "Khas land & borga") },
+        { key: "officer-cards", icon: IdCardIcon, label: tr("কৃষক কার্ড", "Krishak Card") },
+      ],
+    },
+    {
       label: tr("টুলস", "Tools"),
       items: [
         { key: "officer-sync", icon: RefreshCwIcon, label: tr("ফোনে সিঙ্ক", "Sync to phone") },
@@ -207,6 +222,11 @@ export default function Officer({ route }) {
   else if (route === "officer-deeds") page = <DeedList />;
   else if (route === "officer-log") page = <ActivityLog />;
   else if (route === "officer-stats") page = <Statistics />;
+  else if (route === "officer-notices") page = <Notices />;
+  else if (route === "officer-tax") page = <LandTax />;
+  else if (route === "officer-erosion") page = <Erosion />;
+  else if (route === "officer-khas") page = <KhasBorga />;
+  else if (route === "officer-cards") page = <Cards />;
   else if (route === "officer-sync") page = <SyncPhone />;
   else if (route === "officer-next") page = <NextPhase />;
   else page = <RegisterSale />;

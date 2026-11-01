@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { MapPinnedIcon, ExternalLinkIcon, LocateFixedIcon, LoaderCircleIcon } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { plotStatus } from "@/lib/register";
+import { isLost } from "@/lib/land-services";
 import { MOUZAS } from "@/lib/seed";
 import { outline, centre, allOutlines, latLngText, closeZoom } from "@/lib/map";
 import * as F from "@/lib/fraction";
@@ -90,7 +91,7 @@ export default function LandMap({ state, selected, onSelect, className, card = t
         const level = plotStatus(state, id).level;
         const word = tr(LEVEL[level].bn, LEVEL[level].en);
         const on = selected === id;
-        const poly = L.polygon(outline(p), { className: cn("lm-dag", level, on && "sel"), weight: on ? 4 : 2 })
+        const poly = L.polygon(outline(p), { className: cn("lm-dag", level, on && "sel", isLost(state, id) && "lost"), weight: on ? 4 : 2 })
           .on("click", () => pick.current?.(id))
           .addTo(layers);
         const tiny = p.map[2] < 15;
